@@ -4,7 +4,7 @@
 class Player
   
   attr_reader :name
-  attr_accessor :purse, :hand, :hands, :score, :busted, :stand, :split
+  attr_accessor :purse, :hand, :hands, :score, :busted, :stand, :split, :bet
 
   alias :points :score
 
@@ -14,6 +14,7 @@ class Player
     @hand = Hand.new
     @hands = Array.new
     @purse = Purse.new
+    @bet = 0
 
     @busted, @stand, @split = false, false, false
 
@@ -42,5 +43,12 @@ class Player
     @hands.flatten!
   end
 
+  def set_bet(bet)
+    @bet = bet
+  end
+
+  def bet
+    @bet
+  end
 
 end

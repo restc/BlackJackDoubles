@@ -3,6 +3,7 @@ class AckJack
   
   attr_reader :deck, :players, :winner, :game, :names, :bank
 
+  MINIMUM_BET = 20
 
   def initialize(names=nil)
 
@@ -30,7 +31,6 @@ class AckJack
     @winner = nil
     @bank = Bank.new
 
-    self.deal
     # Removing this line for testing purposes #unfinished
     # unless read_instructions? == false
     #   self.read_instructions
@@ -63,12 +63,6 @@ class AckJack
 
   def get_score player
     player.hand.score
-  end
-
-  def scoreboard
-    @players.each do |player|
-      puts "#{player.name} has a score of #{player.score}."
-    end
   end
 
   def deal
@@ -143,6 +137,9 @@ class AckJack
   end
 
   def play
+    self.deal
+    gameplay_logic
+
   end
 
   def bet
@@ -150,23 +147,27 @@ class AckJack
     @players.each do |player|
       puts <<-PARAGRAPH
       #{player.name},
-      The initial bet is 20g. You have #{player.purse.balance}g.
+      The minimum bet is 20g. You have #{player.purse.balance}g.
       Press [Enter] to bet the minimum 20g, or [b] to change your bet.
 
       PARAGRAPH
       input = gets.chomp
       if ['b', 'bet'].include? input
         puts "Hotshot, eh? Enter your bet:"
-        bet = gets.chomp
-        unless bet.to_i >= 20
+        wager = gets.chomp
+        wager = wager.to_i
+        unless wager >= MINIMUM_BET
           puts "20g is the minimum bet. Enter your bet:"
-          bet = gets.chomp
+          wager = gets.chomp.to_i
         end
-        player.purse.subtract_bet(bet)
-        @bank.deposit(bet)
-      elsif "".include? input
-        player.purse.subtract_bet(20)
-        @bank.deposit(20)
+        player.bet = wager
+        player.purse.subtract_bet(wager)
+        @bank.deposit(wager)
+      elsif ["", nil].include? input
+        wager = MINIMUM_BET
+        player.bet = wager
+        player.purse.subtract_bet(wager)
+        @bank.deposit(wager)
       else
         puts "Sorry, I didn't understand that."
         system 'clear'
@@ -174,6 +175,17 @@ class AckJack
       end
     end
   end
+
+  def scoreboard
+    graphics = AckJackGraphics.new
+    @players.each do |player|
+      graphics.print_grid(player.hands)
+      puts "\n#{player.name} has a score of #{player.score}" 
+    end
+
+  end
+
+
 
   def gameplay_logic
     # In order to specify each player
@@ -184,14 +196,13 @@ class AckJack
     self.bet
 
     # Step 2: After both players have bet, print current state of affairs
-
+    self.scoreboard
 
     # Step 3: Allow each player to double the bet before choosing to hit or stand
 
 
     # Step 4: Prompt each player to hit or stand
-
-    self.hit?
+    #self.hit?
 
       # Step 4.5: If any player wants to split hands, implement that here
 

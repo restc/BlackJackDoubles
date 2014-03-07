@@ -72,6 +72,7 @@ class Hand
       else
         pretty_card = {card.suit => card.number}
       end
+      puts pretty_card
     end
   end
 
@@ -80,6 +81,19 @@ class Hand
     shiftHands = @hands[org_hand].pop(card_pos)
     @hands[tar_hand].push(shiftHands)
   end
+
+  def autosplit?
+    # Watcher for when a hand has two cards of the same number
+    case @cards.length
+    when 2
+      if @cards.first.number == @cards.last.number
+        true
+      else
+        false
+      end
+    end
+  end
+
 
   private
   def hand_object
