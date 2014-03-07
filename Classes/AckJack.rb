@@ -156,7 +156,7 @@ class AckJack
         puts "Hotshot, eh? Enter your bet:"
         wager = gets.chomp
         wager = wager.to_i
-        unless wager >= MINIMUM_BET
+        while wager < MINIMUM_BET
           puts "20g is the minimum bet. Enter your bet:"
           wager = gets.chomp.to_i
         end
