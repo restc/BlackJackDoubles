@@ -4,38 +4,46 @@ require "observer"
 
 class Hand
   include Observable
+  include Enumerable
 
-  attr_reader :busted, :cards, :hand_object
+  attr_reader :busted, :cards, :stand
 
-  def initialize
-    @cards = Array.new
+  def initialize(card=nil)
+    if card.nil?
+      @cards = Array.new
+    elsif card.is_a? Card
+      @cards = Array.new(card)
+    end
     @busted = false
+    add_observer(HandDouble.new(self)) # Not implemented
+    add_observer(AceReduce.new(self))
   end
 
   def draw dealt_cards
     if dealt_cards.length > 1
       dealt_cards.each do |card|
-        self.cards << card
+        @cards << card
       end
     else
       self.cards << dealt_cards
     end
-    notify_observers
     self.cards.flatten!
   end
 
   def points
-    unless self.class != Hand
+    unless self.class.is_a? Hand
       self.cards.map {|card|
         case card.number
-        when 11 # Value for Jack
+        when 11
           10
-        when 12 # Value for Queen
+        when 12
           10
-        when 13 # Value for King
+        when 13
           10
-        when 14 # Value for Ace
+        when 14
           11
+        when nil
+          0
         else
           card.number
         end
@@ -60,46 +68,71 @@ class Hand
   def pretty_print
     pretty_card = nil
     self.cards.each do |card|
-      case card.number
-      when 11
-        pretty_card = {card.suit => card.number=10}
-      when 12
-        pretty_card = {card.suit => card.number=10}
-      when 13
-        pretty_card = {card.suit => card.number=10}
-      when 14
-        pretty_card = {card.suit => card.number=11}
+      case
+      when card.number == 11
+        pretty_card = "J of #{card.suit}"
+      when card.number == 12
+        pretty_card = "Q of #{card.suit}"
+      when card.number == 13
+        pretty_card = "K of #{card.suit}"
+      when card.number == 14
+        pretty_card = "A of #{card.suit}"
       else
-        pretty_card = {card.suit => card.number}
+        pretty_card = "#{card.number} of #{card.suit}"
       end
       puts pretty_card
     end
   end
 
-  # Split hand methods
-  def move_cards(org_hand, card_pos, tar_hand)
-    shiftHands = @hands[org_hand].pop(card_pos)
-    @hands[tar_hand].push(shiftHands)
+  def split(player, hand)
+    # Use in response to match?
+    unless hand.is_a? Hand
+      return AckJackErrors.splitERROR
+    end
+    initial_card = hand.shift(1)
+    player.hands.collection.new(initial_card)
+    player.double_bet
+    puts "#{player.name}, your hands split and your bet was doubled"
   end
 
-  def autosplit?
-    # Watcher for when a hand has two cards of the same number
-    case @cards.length
-    when 2
-      if @cards.first.number == @cards.last.number
-        true
-      else
-        false
+  def busted?
+    @busted
+  end
+
+  def declare_bust(default=false)
+    @busted = default
+  end
+
+  def has_ace?
+    aces = 0
+    self.cards.each do |ace|
+      if ace.number == 14
+        aces += 1
+      end
+    end
+    puts "#{aces} aces"
+    aces == 0 ? false : aces
+  end
+
+  def stand?(default=false)
+    @stand ||= default
+  end
+
+  def match?
+    numbers = Array.new
+    self.cards.map {|card|
+      numbers << card.number
+    }
+    return true unless numbers.collect {|n| n > 1 }
+  end
+
+  def reduce_ace
+    self.cards.each do |card|
+      unless card.reduce != true
+        card.number = 1
+        #unfinished – Add watcher to check for ace reduction to keep track
       end
     end
   end
 
-
-  private
-  def hand_object
-    self.object_id
-  end
-
 end #class
-
-

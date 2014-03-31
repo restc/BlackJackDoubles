@@ -5,16 +5,16 @@ class Deck
   # Allow Enumerable methods to be used on Arrays
   include Enumerable
 
-  attr_reader :deck
+  attr_reader :cards
 
   def initialize
-    deck = Array.new
+    cards = Array.new
     suits.each do |suit|
       numbers.each do |number|
-        deck.push Card.new(suit, number)
+        cards.push Card.new(suit, number)
       end
     end
-    @deck = deck.shuffle
+    @cards = cards.shuffle
   end
 
   def suits
@@ -35,5 +35,3 @@ class Deck
   end
 
 end
-
-
