@@ -34,4 +34,8 @@ class Deck
     shuffled
   end
 
+  def serve(num_cards)
+    cards.shift(num_cards)
+  end
+
 end

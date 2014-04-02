@@ -12,7 +12,7 @@ class Hand
     if card.nil?
       @cards = Array.new
     elsif card.is_a? Card
-      @cards = Array.new(card)
+      @cards = [card]
     end
     @busted = false
     add_observer(HandDouble.new(self)) # Not implemented
@@ -89,14 +89,14 @@ class Hand
     unless hand.is_a? Hand
       return AckJackErrors.splitERROR
     end
-    initial_card = hand.shift(1)
+    initial_card = hand.cards.shift(1)
     player.hands.collection.new(initial_card)
     player.double_bet
     puts "#{player.name}, your hands split and your bet was doubled"
   end
 
   def busted?
-    @busted
+    self.points > 21
   end
 
   def declare_bust(default=false)
@@ -123,12 +123,13 @@ class Hand
     self.cards.map {|card|
       numbers << card.number
     }
-    return true unless numbers.collect {|n| n > 1 }
+    numbers.flatten!
+    return true unless (numbers.uniq == numbers.length)
   end
 
   def reduce_ace
     self.cards.each do |card|
-      unless card.reduce != true
+      if card.number == 14
         card.number = 1
         #unfinished – Add watcher to check for ace reduction to keep track
       end

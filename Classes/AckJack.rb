@@ -10,21 +10,20 @@ class AckJack
   def initialize(names=nil)
 
     players = Array.new
-
     if names.nil?
-      @names = get_names
-    elsif !names.nil? && names.is_a?(Array) && names.length == 2
-      @names = names
-    elsif !names.nil? && names.is_a?(Array) && names.length != 2
+      names = get_names
+    elsif (!names.nil? && names.is_a?(Array) && names.length == 2)
+      names = names
+    elsif (!names.nil? && names.is_a?(Array) && names.length != 2)
       # Wrong number of players exception #unfinished
       puts "Wrong number of players"
-      @names = get_names
-    elsif !names.nil? && !names.is_a?(Array)
-      @names = get_names(names)
+      names = get_names
+    elsif (!names.nil? && !names.is_a?(Array))
+      names = get_names(names)
     else
       puts "Something failing in name initialization"
     end
-    @names.each do |name|
+    names.each do |name|
       players << Player.new(name)
     end
 
@@ -38,7 +37,6 @@ class AckJack
     #   self.read_instructions
     # end
     @hand_objects = get_hand_objects
-
   end
 
   def make_deck
@@ -61,7 +59,7 @@ class AckJack
       puts "such as: Washington Lincoln, or: Skywalker, Solo"
       self.get_names
     end
-    return names
+    names
   end
 
   def get_score player
@@ -87,7 +85,7 @@ class AckJack
   def deal
     # This method deals with initial deal
     @players.each do |player|
-      cards = @deck.cards.shift(2)
+      cards = @deck.serve(2)
       # The player will only use their first hand in initial deal
       player.hands.collection.first.draw(cards)
     end
@@ -99,37 +97,61 @@ class AckJack
 
   def hit(player, hand)
     # This method is used when a player wants an additional card
-    unless hand.stand? == true
-      card = @deck.cards.shift(1)
-      hand.draw(card)
-      changed
-      notify_observers(hand)
+    servedCard = @deck.serve(1)
+    servedCard = servedCard.first
+    if match_served_card(hand, servedCard) == true
+      player.hands.new(servedCard)
+      player.double_bet
+      puts "Split #{player.name}'s hand and doubled your bet to #{player.bet}"
+      #unfinished -> flatten hands?
+    else
+      hand.cards << servedCard
+      hand.cards.flatten!
     end
-    if (hand.points > 21 && hand.has_ace?)
-      hand.reduce_ace
-    end
-    unless hand.match? == false
-      player.hands.new(hand.cards.shift(1))
-      puts "Duplicate number found - split the hand!"
+  end
+
+  def match_served_card(hand, card)
+    hand.cards.flatten!
+    match = hand.cards.map {|c| c.number}
+    match.flatten!
+    if match.include? card.number
+      true # Returns true when split hand
+    else
+      false # Returns false when hand should not split
     end
   end
 
   def hit?(player, hand)
     hand.pretty_print
-    puts "\nYou have #{hand.points} points in this hand. \nYou can [h]it or [s]tand."
-    #unfinished
+    unless hand.stand? == true
+      if hand.busted? == true
+        puts "You have over 21 points in this hand: #{hand.points} points"
+        puts "Checking for aces"
+        if hand.has_ace? == true
+          hand.reduce_ace
+          self.hit?(player, hand)
+        else
+          puts "#{player.name}, your hand is bust."
+          hand.declare_bust(true)
+        end
+      else
 
-    input = gets.chomp
-    if 'h'.include? input
-      self.hit(player, hand)
-      hand.stand?(stand=false)
-      self.hit?(player, hand)
-    elsif 's'.include? input
-      hand.stand?(stand=true)
-      #unfinished method, #goto next player
-    else
-      puts "Type [h] to hit, or [s] to stand."
-      self.hit?(player, hand)
+        puts "\nYou have #{hand.points} points in this hand. \nYou can [h]it or [s]tand."
+        #unfinished
+
+        input = gets.chomp
+        if 'h'.include? input
+          self.hit(player, hand)
+          hand.stand?(stand=false)
+          self.hit?(player, hand)
+        elsif 's'.include? input
+          hand.stand?(stand=true)
+          #unfinished method, #goto next player
+        else
+          puts "Type [h] to hit, or [s] to stand."
+          self.hit?(player, hand)
+        end
+      end
     end
   end
 
@@ -179,6 +201,7 @@ class AckJack
   end
 
   def play
+    gameplay_intro
     gameplay_logic
   end
 
@@ -236,41 +259,56 @@ class AckJack
 
   end
 
-  def gameplay_logic
-    # In order to specify each player individually
-    player1 = @players.first
-    player2 = @players.last
+  def double_bet(player)
+    # Allow each player to double the bet before choosing to hit or stand
+    system 'clear'
+    puts "\n\n\n"
+    puts "Would you like to double your bet before hitting?"
+    puts "Please type [y] to bet, or press any other key.\n"
+    double = gets.chomp
+    if 'y'.include? double.downcase
+      system 'clear'
+      player.double_bet
+      puts "Your bet is set at #{player.bet} per hand.\n\n"
+    else
+      system 'clear'
+      puts "Your bet is set at #{player.bet} per hand.\n\n"
+    end
+  end
+
+  def gameplay_intro
+    system 'clear'
+    puts "This is a spinoff of BlackJack where you split when you're dealt a repeat number and the player with the best set of hands wins."
     unless self.read_instructions? == false
       self.read_instructions
     end
-    system 'clear'
 
-    # Step 1: Verify both players have made a bet
+    # Verify both players have made a bet
+    system 'clear'
     self.bet
 
-    # Step 2: After both players have bet, deal, then print current state of affairs
+    # After both players have bet, deal then print current state of affairs
     self.deal
-    puts "\n\n\n\n"
     system 'clear'
     self.scoreboard
 
-    puts "\n\nPress any key to continue... "
+    puts "\n\nPress [Enter] key to continue... "
     continue = gets.chomp
+  end
 
-
-    # ... Now, select each player and have each player play out their hands before the next begins
-    # This way, there's no back and forth.
-    system 'clear'
+  def gameplay_logic
+    # Implement game, certainly could be broken down better. Hackety hack etc.
 
     @players.each do |player|
-      puts "It is now #{player.name}'s turn."
-      puts "\nPlease give #{player.name} the computer, and press any key to continue... "
-      continue = gets.chomp
       system 'clear'
-
-    # Step 3: Allow each player to double the bet before choosing to hit or stand
+      puts "\nIt is now #{player.name}'s turn."
+      puts "Press [Enter] to continue... "
+      continue = gets.chomp
+    # Allow each player to double the bet before choosing to hit or stand
+      system 'clear'
+      puts "\n\n\n"
       puts "Would you like to double your bet before hitting?"
-      puts "Please type [y] or [n]"
+      puts "Please type [y] to bet, or press any other key.\n"
       double = gets.chomp
       if 'y'.include? double.downcase
         system 'clear'
@@ -283,17 +321,24 @@ class AckJack
 
 
     # Step 4: Prompt each player to hit or stand per hand
+    # def gameplay_hit
       hands = player.hands.collection
-      unless hands.length < 2
-        hands.each do |hand|
-          unless hand.stand? == true
+      hands.each do |hand|
+        unless hand.stand? == true
+          case hand.points <=> 21
+          when -1
             self.hit?(player, hand)
-
+          when 0
+            puts "Win! #{player.name}, you have 21 points!"
+          when 1
+            puts "#{player.name} busted with #{hand.points}."
           end
         end
-      else
-        #unfinished
-        self.hit?(player, player.hands.collection.first) # This will be singularly used when the player only has one hand
+      end
+
+      if player == @players.first
+        puts "Press [Enter] before #{@players.last.name} begins."
+        continue = gets.chomp
       end
       # By default, if the player hits, the card received is a duplicate
       # value of another in the hand, split hands provided the player can afford to double
@@ -351,7 +396,7 @@ class AckJack
     puts "\t Players \t Hand \t\t Score \t\t Won \t"
     @players.each do |player|
       player.hands.collection.each_with_index do |hand, index|
-        puts "\t #{player.name} \t\t #{index+1} \t #{hand.points} \t #{}"
+        puts "\t #{player.name} \t\t #{index+1} \t\t #{hand.points} \t #{}"
       end
     end
   end
