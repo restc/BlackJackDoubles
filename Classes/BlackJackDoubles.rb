@@ -412,7 +412,21 @@ class BlackJackDoubles
   def declare_winner
     player1 = find_winner(@players.first)
     player2 = find_winner(@players.last)
-    winners = Array.new(player1, player2)
+    winner = Array.new
+    winner << ['Player 1', player1, 'Player 2', player2]
+    winner.flatten!
+    p2_index = winner.index('Player 2')
+    # Odd indexes of winner will be the Hand objects for player1
+    # => i.e. winner[0] == Player 1
+    # => i.e. winner[p2_index] == Player2
+
+    # winner[1] = Hand number
+    # winner[2] = Hand score
+
+    #Maybe a hash would work better?
+
+
+
   end
 
   # Next to implement: Game/Scoring Logic, Winning Logic, Watchers for game winner
