@@ -1,4 +1,4 @@
-# AckJack.rb
+# BlackJackDoubles.rb
 # observer methods
 
 class Notifier

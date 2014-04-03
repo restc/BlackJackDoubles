@@ -1,4 +1,4 @@
-# AckJack.rb
+# BlackJackDoubles.rb
 # class Bank
 
 # A temporary authority to hold money until a winner is found

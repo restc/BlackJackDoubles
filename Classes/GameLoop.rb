@@ -1,2 +1,3 @@
-# game = AckJack.new
+# Dir['']
+# game = BlackJackDoubles.new
 # game.play

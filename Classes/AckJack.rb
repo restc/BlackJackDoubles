@@ -1,6 +1,6 @@
 require 'observer'
 
-class AckJack
+class BlackJackDoubles
 
   include Observable
   attr_reader :deck, :players, :winner, :names, :bank, :hand_objects
@@ -186,13 +186,13 @@ class AckJack
     system 'clear'
     puts <<-PARAGRAPH
 
-    AckJack is a spinoff of the popular card game Blackjack.
+    BlackJackDoubles is a spinoff of the popular card game BlBlackJackDoubles.
     It requires two players to play, and a neutral dealer.
 
     When starting the game, both players set an initial bet.
     They are then dealt two cards each, face up, so that both
     may see the other player's hand. A hand is any collection of cards.
-    Like Blackjack, you win if you score 21 points, or if you have a
+    Like BlBlackJackDoubles, you win if you score 21 points, or if you have a
     higher score than the other player's corresponding hand while staying
     under 21. You may have as many hands as you'd like.
 
@@ -249,7 +249,7 @@ class AckJack
   end
 
   def scoreboard(player=nil)
-    graphics = AckJackGraphics.new
+    graphics = BlackJackDoublesGraphics.new
     if player == nil
       @players.each do |player|
         graphics.print_grid(player.hands)
@@ -287,7 +287,7 @@ class AckJack
 
   def gameplay_intro
     system 'clear'
-    puts "This is a spinoff of BlackJack where you split when you're dealt a repeat number and the player with the best set of hands wins."
+    puts "This is a spinoff of BlBlackJackDoubles where you split when you're dealt a repeat number and the player with the best set of hands wins."
     unless self.read_instructions? == false
       self.read_instructions
     end

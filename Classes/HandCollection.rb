@@ -1,4 +1,4 @@
-# AckJack.rb
+# BlackJackDoubles.rb
 # class HandCollection
 
 class HandCollection < Hand

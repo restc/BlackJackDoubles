@@ -1,4 +1,4 @@
-# AckJack.rb
+# BlackJackDoubles.rb
 # class Hand
 require "observer"
 
@@ -83,7 +83,7 @@ class Hand
   def split(player, hand)
     # Use in response to match?
     unless hand.is_a? Hand
-      return AckJackErrors.splitERROR
+      return BlackJackDoublesErrors.splitERROR
     end
     initial_card = hand.cards.shift(1)
     player.hands.collection.new(initial_card)

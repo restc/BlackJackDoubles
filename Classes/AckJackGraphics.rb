@@ -1,8 +1,8 @@
-# AckJack.rb
+# BlackJackDoubles.rb
 # class Graphics
 
 
-class AckJackGraphics
+class BlackJackDoublesGraphics
 
   def print_grid(hands)
     puts ""
