@@ -86,8 +86,15 @@ class AckJack
     # This method deals with initial deal
     @players.each do |player|
       cards = @deck.serve(2)
+      # Find if cards are of the same number
+      if cards.first.number == cards.last.number
+        # If they are, distribute card 1 to first hand and card 2 to second
+        player.hands.collection.first.draw(cards.first)
+        player.hands.new(cards.last)
+      else
       # The player will only use their first hand in initial deal
-      player.hands.collection.first.draw(cards)
+        player.hands.collection.first.draw(cards)
+      end
     end
   end
 
@@ -103,7 +110,7 @@ class AckJack
       player.hands.new(servedCard)
       player.double_bet
       puts "Split #{player.name}'s hand and doubled your bet to #{player.bet}"
-      #unfinished -> flatten hands?
+
     else
       hand.cards << servedCard
       hand.cards.flatten!
@@ -124,17 +131,17 @@ class AckJack
   def hit?(player, hand)
     hand.pretty_print
     unless hand.stand? == true
-      if hand.busted? == true
-        puts "You have over 21 points in this hand: #{hand.points} points"
-        puts "Checking for aces"
-        if hand.has_ace? == true
-          hand.reduce_ace
-          self.hit?(player, hand)
-        else
-          puts "#{player.name}, your hand is bust."
-          hand.declare_bust(true)
-        end
-      else
+      case
+      when (hand.points > 21 && hand.has_ace?)
+        puts "#{player.name}, you have over 21 points in this hand: #{hand.points} points"
+        puts "Reducing your ace to equal 1 points instead of 11 points."
+        hand.reduce_ace
+        puts "After reducing value of the ace, you have #{hand.points} points."
+        self.hit?(player, hand)
+      when (hand.points > 21 && hand.has_ace? == false)
+        puts "#{player.name}, your hand is bust: #{hand.points} points."
+        hand.declare_bust(true)
+      when hand.points < 21
 
         puts "\nYou have #{hand.points} points in this hand. \nYou can [h]it or [s]tand."
         #unfinished
@@ -151,6 +158,8 @@ class AckJack
           puts "Type [h] to hit, or [s] to stand."
           self.hit?(player, hand)
         end
+      when hand.points == 21
+        puts "Blackjack! You have as many points as possible with this hand!"
       end
     end
   end
@@ -390,6 +399,15 @@ class AckJack
       end
     end
     score
+  end
+
+  def find_winner(player)
+    result = Array.new
+    player.hands.collection.each_with_index do |hand, index|
+      index += 1
+      result.push(["Hand #{index}", hand.points])
+    end
+    result.flatten!
   end
 
   def winning_score

@@ -20,12 +20,8 @@ class Hand
   end
 
   def draw dealt_cards
-    if dealt_cards.length > 1
-      dealt_cards.each do |card|
-        @cards << card
-      end
-    else
-      self.cards << dealt_cards
+    dealt_cards.each do |card|
+      @cards << card
     end
     self.cards.flatten!
   end
