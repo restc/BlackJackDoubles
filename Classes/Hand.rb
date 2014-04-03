@@ -9,21 +9,20 @@ class Hand
   attr_reader :busted, :cards, :stand
 
   def initialize(card=nil)
-    if card.nil?
-      @cards = Array.new
-    elsif card.is_a? Card
-      @cards = [card]
+    @cards = Array.new
+    unless card != nil
+      unless !card.is_a? Card
+        @cards << card
+      end
     end
     @busted = false
-    add_observer(HandDouble.new(self)) # Not implemented
-    add_observer(AceReduce.new(self))
+    # add_observer(HandDouble.new(self)) # Not currently implemented
+    # add_observer(AceReduce.new(self))
   end
 
   def draw dealt_cards
-    dealt_cards.each do |card|
-      @cards << card
-    end
-    self.cards.flatten!
+    @cards << dealt_cards
+    @cards.flatten!
   end
 
   def points
@@ -106,7 +105,7 @@ class Hand
         aces += 1
       end
     end
-    puts "#{aces} aces"
+    # puts "#{aces} aces"
     aces == 0 ? false : aces
   end
 

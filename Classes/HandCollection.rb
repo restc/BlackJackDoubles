@@ -10,7 +10,8 @@ class HandCollection < Hand
   end
 
   def new(card)
-    @collection << Hand.new(card)
+    @collection << Hand.new
+    @collection.last.cards << card
   end
 
   def split(hand)

@@ -36,7 +36,6 @@ class BlackJackDoubles
     # unless read_instructions? == false
     #   self.read_instructions
     # end
-    @hand_objects = get_hand_objects
   end
 
   def make_deck
@@ -65,22 +64,6 @@ class BlackJackDoubles
   def get_score player
     player.hand.score
   end
-
-  def get_hand_objects
-    objects = {}
-    @players.each do |player|
-      objects[player.name] = nil
-      player.hands.collection.each do |hand|
-        if objects[player.name] == nil
-          objects[player.name] = [hand.object_id]
-        else
-          objects[player.name] += [hand.object_id]
-        end
-      end
-    end
-    objects
-  end
-
 
   def deal
     # This method deals with initial deal
@@ -134,7 +117,7 @@ class BlackJackDoubles
       case
       when (hand.points > 21 && hand.has_ace?)
         puts "#{player.name}, you have over 21 points in this hand: #{hand.points} points"
-        puts "Reducing your ace to equal 1 points instead of 11 points."
+        puts "Reducing your ace's value to 1 instead of 11."
         hand.reduce_ace
         puts "After reducing value of the ace, you have #{hand.points} points."
         self.hit?(player, hand)
@@ -287,7 +270,7 @@ class BlackJackDoubles
 
   def gameplay_intro
     system 'clear'
-    puts "This is a spinoff of BlBlackJackDoubles where you split when you're dealt a repeat number and the player with the best set of hands wins."
+    puts "This is a spinoff of BlackJackDoubles where you split when you're dealt a repeat number and the player with the best set of hands wins."
     unless self.read_instructions? == false
       self.read_instructions
     end
@@ -328,43 +311,36 @@ class BlackJackDoubles
         puts "Your bet is set at #{player.bet} per hand.\n\n"
       end
 
-
-    # Step 4: Prompt each player to hit or stand per hand
-    # def gameplay_hit
-      hands = player.hands.collection
-      hands.each do |hand|
-        unless hand.stand? == true
-          case hand.points <=> 21
-          when -1
-            self.hit?(player, hand)
-          when 0
-            puts "Win! #{player.name}, you have 21 points!"
-          when 1
-            puts "#{player.name} busted with #{hand.points}."
-          end
-        end
-      end
+    # Prompt each player to hit or stand per hand
+      self.gameplay_hit_or_stand(player)
 
       if player == @players.first
         puts "Press [Enter] before #{@players.last.name} begins."
         continue = gets.chomp
       end
-      # By default, if the player hits, the card received is a duplicate
-      # value of another in the hand, split hands provided the player can afford to double
-      # his or her bet
-      # Create watcher here #unfinished
-
-
-    end
-
-
-    # Step 6: Announce gameplay to have ended and sum scores
-      #winninglogic #unfinished
-    puts "Gameplay has ended! Let's look at the scores."
+    end # End players loop
     self.winning_score
-    # Implement scoring of all hands
-    # End @players.each loop
-    nil
+
+
+  end
+
+  def gameplay_hit_or_stand(player)
+    hands = player.hands.collection
+    hands.each do |hand|
+      unless hand.stand? == true
+        case hand.points <=> 21
+        when -1
+          self.hit?(player, hand)
+        when 0
+          puts "Win! #{player.name}, you have 21 points!"
+        when 1
+          puts "#{player.name} busted with #{hand.points}."
+        end
+      end
+    end
+    unless hands.each {|hand| hand.stand? == true || hand.busted? == true}
+      self.gameplay_hit_or_stand(player)
+    end
   end
 
   def largest_hand_collection
@@ -385,7 +361,7 @@ class BlackJackDoubles
   def score_hands
     score = Array.new
     largest_hand_collection.each do |lhc|
-      result = (@players.first.hands.collection[x].points <=> self.players.last.hands.collection[x].points)
+      result = (@players.first.hands.collection[x].points <=>   self.players.last.hands.collection[x].points)
       puts "Hand #{lhc+1} :"
       puts "#{@players.first.name} #{@players.first.hands.collection[x].points}"
       puts "#{@players.last.name} #{@players.last.hands.collection[x].points}"
@@ -424,16 +400,20 @@ class BlackJackDoubles
     players << @players.each {|pl| p pl }
     players.each_with_index {|player, i|
       case player
-      when name[i] == @players.first.name
+      when player[i].name == @players.first.name
         hands[i+1].insert(player.hands[i].points)
-      when name[i] == @players.last.name
+      when player[i].name == @players.last.name
         hands[i+1].insert(player.hands[i].points)
       end
     }
     hands
   end
 
-
+  def declare_winner
+    player1 = find_winner(@players.first)
+    player2 = find_winner(@players.last)
+    winners = Array.new(player1, player2)
+  end
 
   # Next to implement: Game/Scoring Logic, Winning Logic, Watchers for game winner
   # Errors/Exceptions

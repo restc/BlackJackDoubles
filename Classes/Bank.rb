@@ -23,5 +23,18 @@ class Bank
   end
 
   def multiplier
+    case
+    when 1
+      1
+    when 2
+      1.5
+    when 3
+      2
+    when 4
+      5
+    when 5
+      10
+    end
   end
+
 end
