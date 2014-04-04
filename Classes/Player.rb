@@ -70,4 +70,13 @@ class Player
     @bet *= 2
   end
 
+  def reset
+    @hands = HandCollection.new
+    hand = Hand.new
+    @bet = nil
+    @hands.collection << hand
+    @hands.collection.last.cards.flatten!
+  end
+
+
 end

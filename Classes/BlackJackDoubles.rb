@@ -7,35 +7,35 @@ class BlackJackDoubles
 
   MINIMUM_BET = 20
 
-  def initialize(names=nil)
+  def initialize(names=nil, first_run=true)
+    case first_run
+    when true
+      players = Array.new
+      if names.nil?
+        names = get_names
+      elsif (!names.nil? && names.is_a?(Array) && names.length == 2)
+        names = names
+      elsif (!names.nil? && names.is_a?(Array) && names.length != 2)
+        # Wrong number of players exception #unfinished
+        puts "Wrong number of players"
+        names = get_names
+      elsif (!names.nil? && !names.is_a?(Array))
+        names = get_names(names)
+      else
+        puts "Something failing in name initialization"
+      end
+      names.each do |name|
+        players << Player.new(name)
+      end
 
-    players = Array.new
-    if names.nil?
-      names = get_names
-    elsif (!names.nil? && names.is_a?(Array) && names.length == 2)
-      names = names
-    elsif (!names.nil? && names.is_a?(Array) && names.length != 2)
-      # Wrong number of players exception #unfinished
-      puts "Wrong number of players"
-      names = get_names
-    elsif (!names.nil? && !names.is_a?(Array))
-      names = get_names(names)
-    else
-      puts "Something failing in name initialization"
+      @players = players
+      @deck = self.make_deck
+      @bank = Bank.new
+    when false
+      @players = @players
+      @deck = self.make_deck
+      @bank = @bank
     end
-    names.each do |name|
-      players << Player.new(name)
-    end
-
-    @players = players
-    @deck = self.make_deck
-    @winner = nil
-    @bank = Bank.new
-
-    # Removing this line for testing purposes #unfinished
-    # unless read_instructions? == false
-    #   self.read_instructions
-    # end
   end
 
   def make_deck
@@ -70,12 +70,11 @@ class BlackJackDoubles
     @players.each do |player|
       cards = @deck.serve(2)
       # Find if cards are of the same number
+      # If they are, distribute card 1 to first hand and card 2 to second
       if cards.first.number == cards.last.number
-        # If they are, distribute card 1 to first hand and card 2 to second
         player.hands.collection.first.draw(cards.first)
         player.hands.new(cards.last)
       else
-      # The player will only use their first hand in initial deal
         player.hands.collection.first.draw(cards)
       end
     end
@@ -441,7 +440,7 @@ class BlackJackDoubles
   def reset_game
     @players.each do |player|
       player.bet = 0
-      player.hands.flush
+      player.reset   
     end
   end
 

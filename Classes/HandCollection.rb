@@ -24,6 +24,6 @@ class HandCollection < Hand
   end
 
   def flush
-    @collection = self.new
+    @collection = Array.new
   end
 end
