@@ -19,4 +19,11 @@ class HandCollection < Hand
     new(moveCard)
   end
 
+  def size
+    @collection.length
+  end
+
+  def flush
+    @collection = self.new
+  end
 end

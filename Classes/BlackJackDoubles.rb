@@ -116,13 +116,12 @@ class BlackJackDoubles
     unless hand.stand? == true
       case
       when (hand.points > 21 && hand.has_ace?)
-        puts "#{player.name}, you have over 21 points in this hand: #{hand.points} points"
-        puts "Reducing your ace's value to 1 instead of 11."
+        puts "\n#{player.name}, you have over 21 points in this hand: #{hand.points} points"
         hand.reduce_ace
-        puts "After reducing value of the ace, you have #{hand.points} points."
+        puts "Let's make your ace worth 1 instead of 11. Now you have #{hand.points} points."
         self.hit?(player, hand)
       when (hand.points > 21 && hand.has_ace? == false)
-        puts "#{player.name}, your hand is bust: #{hand.points} points."
+        puts "\n#{player.name}, your hand is bust: #{hand.points} points."
         hand.declare_bust(true)
       when hand.points < 21
 
@@ -319,9 +318,8 @@ class BlackJackDoubles
         continue = gets.chomp
       end
     end # End players loop
-    self.winning_score
-
-
+    self.declare_winner
+    nil
   end
 
   def gameplay_hit_or_stand(player)
@@ -410,24 +408,43 @@ class BlackJackDoubles
   end
 
   def declare_winner
-    player1 = find_winner(@players.first)
-    player2 = find_winner(@players.last)
-    winner = Array.new
-    winner << ['Player 1', player1, 'Player 2', player2]
-    winner.flatten!
-    p2_index = winner.index('Player 2')
-    # Odd indexes of winner will be the Hand objects for player1
-    # => i.e. winner[0] == Player 1
-    # => i.e. winner[p2_index] == Player2
+    scorechart = {}
+    scorechart["Player 1"] = @players.first.hands.collection.map {|hand| hand.points}.drop_while {|num| num > 21}.sort
+    scorechart["Player 2"] = @players.last.hands.collection.map {|hand| hand.points}.drop_while {|num| num > 21}.sort
 
-    # winner[1] = Hand number
-    # winner[2] = Hand score
-
-    #Maybe a hash would work better?
-
-
+    result = (scorechart["Player 1"] <=> scorechart["Player 2"])
+    case result
+    when 1
+      winnings = @bank.payout(@players.first, @players.first.hands.size)
+      puts "Player 1 wins! #{@players.first.name} wins #{winnings}g with #{@players.first.hands.size} hands."
+    when 0
+      puts "Deadlocked Tie. No one wins."
+      @bank.balance = 0
+      # winnings = @bank.balance
+      # partial = winnings / 2
+      # puts "Player 1 wins #{partial}g."
+      # @bank.payout(@players.first, @players.first.hands.size)
+      # puts "Player 2 wins #{partial}g."
+      # @bank.payout(@players.last, @players.last.hands.size)
+    when -1
+      winnings = @bank.payout(@players.last, @players.last.hands.size)
+      puts "Player 2 wins! #{@players.last.name} wins #{winnings}g with #{@players.last.hands.size} hands."
+    end
+    puts "\n\nPlay again?"
+    continue = gets.chomp
+    unless ['n', 'no'].include? continue
+      self.reset_game
+    end
 
   end
+
+  def reset_game
+    @players.each do |player|
+      player.bet = 0
+      player.hands.flush
+    end
+  end
+
 
   # Next to implement: Game/Scoring Logic, Winning Logic, Watchers for game winner
   # Errors/Exceptions

@@ -18,12 +18,15 @@ class Bank
 
   def payout(winner, multiplier)
     # winner here is the player object
-    winner.purse.balance += @balance
+    factor = self.multiplier(multiplier)
+    winnings = @balance * factor
+    winner.purse.add_winnings(winnings)
     @balance = 0
+    winnings
   end
 
-  def multiplier
-    case
+  def multiplier(number_of_hands)
+    case number_of_hands
     when 1
       1
     when 2
@@ -34,6 +37,16 @@ class Bank
       5
     when 5
       10
+    when 6
+      20
+    when 7
+      50
+    when 8
+      80
+    when 9
+      99
+    when 10
+      1000
     end
   end
 
