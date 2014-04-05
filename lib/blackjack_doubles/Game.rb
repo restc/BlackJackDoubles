@@ -1,7 +1,7 @@
 require 'observer'
 
 module BlackjackDoubles
-  class GameMechanics
+  class Game
 
     include Observable
     attr_reader :deck, :players, :winner, :names, :bank, :hand_objects
