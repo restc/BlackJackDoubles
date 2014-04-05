@@ -1,5 +1,5 @@
 require 'observer'
-
+# module BlackJackDoubles Namespace this module => give class a diff name
 class BlackJackDoubles
 
   include Observable

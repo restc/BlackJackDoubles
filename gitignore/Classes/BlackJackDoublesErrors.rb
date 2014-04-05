@@ -1,7 +1,7 @@
 # BlackJackDoubles.rb
 # Errors
 
-class BlackJackDoublesErrors
+class Errors
   def splitERROR
     puts "I can only split a Hand."
   end
