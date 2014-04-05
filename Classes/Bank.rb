@@ -16,9 +16,15 @@ class Bank
     @balance += bet
   end
 
-  def payout(winner, multiplier)
+  def payout(winner)
     # winner here is the player object
-    factor = self.multiplier(multiplier)
+    hands_not_busted = 0
+    winner.hands.collection.each do |hand|
+      unless hand.points < 21
+        hands_not_busted += 1
+      end
+    end
+    factor = self.multiplier(hands_not_busted)
     winnings = @balance * factor
     winner.purse.add_winnings(winnings)
     @balance = 0
@@ -30,11 +36,11 @@ class Bank
     when 1
       1
     when 2
-      1.5
-    when 3
       2
+    when 3
+      4
     when 4
-      5
+      7
     when 5
       10
     when 6

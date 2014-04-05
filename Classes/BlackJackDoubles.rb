@@ -414,7 +414,7 @@ class BlackJackDoubles
     result = (scorechart["Player 1"] <=> scorechart["Player 2"])
     case result
     when 1
-      winnings = @bank.payout(@players.first, @players.first.hands.size)
+      winnings = @bank.payout(@players.first)
       puts "Player 1 wins! #{@players.first.name} wins #{winnings}g with #{@players.first.hands.size} hands."
     when 0
       puts "Deadlocked Tie. No one wins."
@@ -426,7 +426,7 @@ class BlackJackDoubles
       # puts "Player 2 wins #{partial}g."
       # @bank.payout(@players.last, @players.last.hands.size)
     when -1
-      winnings = @bank.payout(@players.last, @players.last.hands.size)
+      winnings = @bank.payout(@players.last)
       puts "Player 2 wins! #{@players.last.name} wins #{winnings}g with #{@players.last.hands.size} hands."
     end
     puts "\n\nPlay again?"
@@ -440,7 +440,7 @@ class BlackJackDoubles
   def reset_game
     @players.each do |player|
       player.bet = 0
-      player.reset   
+      player.reset
     end
   end
 
