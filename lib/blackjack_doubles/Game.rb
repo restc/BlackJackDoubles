@@ -231,7 +231,7 @@ module BlackjackDoubles
     end
 
     def scoreboard(player=nil)
-      graphics = BlackJackDoublesGraphics.new
+      graphics = Graphics.new
       if player == nil
         @players.each do |player|
           graphics.print_grid(player.hands)
@@ -444,11 +444,6 @@ module BlackjackDoubles
         player.reset
       end
     end
-
-
-    # Next to implement: Game/Scoring Logic, Winning Logic, Watchers for game winner
-    # Errors/Exceptions
-
 
   end
 end
