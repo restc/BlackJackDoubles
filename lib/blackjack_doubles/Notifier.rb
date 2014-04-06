@@ -1,5 +1,3 @@
-# AckJack.rb
-# observer methods
 
 module BlackjackDoubles
   class Notifier

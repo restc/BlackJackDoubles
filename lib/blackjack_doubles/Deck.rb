@@ -1,5 +1,3 @@
-# AckJack.rb
-# class Deck
 
 module BlackjackDoubles
   class Deck

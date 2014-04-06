@@ -1,5 +1,3 @@
-# AckJack.rb
-# Errors
 
 module BlackjackDoubles
   class Errors

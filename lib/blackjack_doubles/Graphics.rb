@@ -1,5 +1,3 @@
-# AckJack.rb
-# class Graphics
 
 module BlackjackDoubles
   class Graphics

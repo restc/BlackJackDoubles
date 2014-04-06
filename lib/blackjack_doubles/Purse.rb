@@ -1,5 +1,3 @@
-# AckJack.rb
-# class Purse
 
 module BlackjackDoubles
   class Purse

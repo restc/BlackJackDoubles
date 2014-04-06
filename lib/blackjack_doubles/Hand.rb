@@ -1,6 +1,3 @@
-# AckJack.rb
-# class Hand
-require "observer"
 
 module BlackjackDoubles
   class Hand
@@ -10,21 +7,20 @@ module BlackjackDoubles
     attr_reader :busted, :cards, :stand
 
     def initialize(card=nil)
-      if card.nil?
-        @cards = Array.new
-      elsif card.is_a? Card
-        @cards = [card]
+      @cards = Array.new
+      unless card != nil
+        unless !card.is_a? Card
+          @cards << card
+        end
       end
       @busted = false
-      add_observer(HandDouble.new(self)) # Not implemented
-      add_observer(AceReduce.new(self))
+      # add_observer(HandDouble.new(self)) # Not currently implemented
+      # add_observer(AceReduce.new(self))
     end
 
     def draw dealt_cards
-      dealt_cards.each do |card|
-        @cards << card
-      end
-      self.cards.flatten!
+      @cards << dealt_cards
+      @cards.flatten!
     end
 
     def points
@@ -84,7 +80,7 @@ module BlackjackDoubles
     def split(player, hand)
       # Use in response to match?
       unless hand.is_a? Hand
-        return AckJackErrors.splitERROR
+        return BlackJackDoublesErrors.splitERROR
       end
       initial_card = hand.cards.shift(1)
       player.hands.collection.new(initial_card)
@@ -107,7 +103,6 @@ module BlackjackDoubles
           aces += 1
         end
       end
-      puts "#{aces} aces"
       aces == 0 ? false : aces
     end
 
@@ -128,10 +123,10 @@ module BlackjackDoubles
       self.cards.each do |card|
         if card.number == 14
           card.number = 1
-          #unfinished – Add watcher to check for ace reduction to keep track
         end
       end
     end
 
   end #class
+
 end

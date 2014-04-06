@@ -59,7 +59,7 @@ module BlackjackDoubles
         puts "such as: Washington Lincoln, or: Skywalker, Solo"
         self.get_names
       end
-      names
+      names.capitalize
     end
 
     def get_score player

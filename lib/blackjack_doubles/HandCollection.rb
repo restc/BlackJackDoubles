@@ -11,7 +11,8 @@ module BlackjackDoubles
     end
 
     def new(card)
-      @collection << Hand.new(card)
+      @collection << Hand.new
+      @collection.last.cards << card
     end
 
     def split(hand)
@@ -19,5 +20,12 @@ module BlackjackDoubles
       new(moveCard)
     end
 
+    def size
+      @collection.length
+    end
+
+    def flush
+      @collection = HandCollection.new
+    end
   end
 end
