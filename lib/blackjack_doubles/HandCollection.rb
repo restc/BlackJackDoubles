@@ -19,5 +19,9 @@ module BlackjackDoubles
       new(moveCard)
     end
 
+    def size
+      @collection.size
+    end
+
   end
 end
