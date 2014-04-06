@@ -11,6 +11,9 @@ module BlackjackDoubles
     def initialize(names=nil, first_run=true)
       case first_run
       when true
+        unless self.read_instructions? == false
+          self.read_instructions
+        end
         players = Array.new
         if names.nil?
           names = get_names
@@ -29,6 +32,7 @@ module BlackjackDoubles
           players << Player.new(name)
         end
 
+        @names = names
         @players = players
         @deck = self.make_deck
         @bank = Bank.new
@@ -199,33 +203,29 @@ module BlackjackDoubles
     def bet
       #1) Initial bet
       @players.each do |player|
-        puts <<-PARAGRAPH
-        #{player.name},
-        The minimum bet is 20g. You have #{player.purse.balance}g.
-        Press [Enter] to bet the minimum 20g, or [b] to change your bet.
+        unless player.bet != nil
+          puts <<-PARAGRAPH
+          #{player.name},
+          The minimum bet is 20g. You have #{player.purse.balance}g.
+          \n\tWhat will you wager?
 
-        PARAGRAPH
-        input = gets.chomp
-        if ['b', 'bet'].include? input
-          puts "Hotshot, eh? Enter your bet:"
-          wager = gets.chomp
-          wager = wager.to_i
+          PARAGRAPH
+          wager = gets.chomp.to_i
           while wager < MINIMUM_BET
-            puts "20g is the minimum bet. Enter your bet:"
+            puts "The minimum bet is #{MINIMUM_BET}. Enter your bet: \n"
             wager = gets.chomp.to_i
           end
+
           player.bet = wager
           player.purse.subtract_bet(wager)
           @bank.deposit(wager)
-        elsif ["", nil].include? input
-          wager = MINIMUM_BET
-          player.bet = wager
-          player.purse.subtract_bet(wager)
-          @bank.deposit(wager)
+
+            # puts "Sorry, I didn't understand that. Please only type numbers."
+            # system 'clear'
+            # self.bet
+            #
         else
-          puts "Sorry, I didn't understand that."
-          system 'clear'
-          self.bet
+          puts "#{player.name}, you have already bet #{player.bet}."
         end
       end
     end
@@ -234,14 +234,14 @@ module BlackjackDoubles
       graphics = Graphics.new
       if player == nil
         @players.each do |player|
-          graphics.print_grid(player.hands)
+          graphics.print_grid(player)
           puts "\n#{player.name} has the following scores for each hand: "
           player.hands.collection.each_with_index do |hand, index|
             puts "Hand #{index + 1} has a score of #{hand.points} points."
           end
         end
       else
-        graphics.print_grid(player.hands)
+        graphics.print_grid(player)
         puts "\n#{player.name} has the following scores for each hand: "
         player.hands.collection.each_with_index do |hand, index|
           puts "Hand #{index + 1} has a score of #{hand.points} points."
@@ -269,10 +269,7 @@ module BlackjackDoubles
 
     def gameplay_intro
       system 'clear'
-      puts "This is a spinoff of BlackJackDoubles where you split when you're dealt a repeat number and the player with the best set of hands wins."
-      unless self.read_instructions? == false
-        self.read_instructions
-      end
+      puts "\n\n\tYou have to bet to get into the game"
 
       # Verify both players have made a bet
       system 'clear'
@@ -299,7 +296,7 @@ module BlackjackDoubles
         system 'clear'
         puts "\n\n\n"
         puts "Would you like to double your bet before hitting?"
-        puts "Please type [y] to bet, or press any other key.\n"
+        puts "Please type [y] to double bet, or press any other key.\n"
         double = gets.chomp
         if 'y'.include? double.downcase
           system 'clear'
@@ -416,7 +413,7 @@ module BlackjackDoubles
       case result
       when 1
         winnings = @bank.payout(@players.first)
-        puts "Player 1 wins! #{@players.first.name} wins #{winnings}g with #{@players.first.hands.size} hands."
+        puts "Player 1 wins! #{@players.first.name} wins #{winnings}g with #{@players.first.hands.hands_not_busted} hands."
       when 0
         puts "Deadlocked Tie. No one wins."
         @bank.balance = 0
@@ -428,13 +425,9 @@ module BlackjackDoubles
         # @bank.payout(@players.last, @players.last.hands.size)
       when -1
         winnings = @bank.payout(@players.last)
-        puts "Player 2 wins! #{@players.last.name} wins #{winnings}g with #{@players.last.hands.size} hands."
+        puts "Player 2 wins! #{@players.last.name} wins #{winnings}g with #{@players.last.hands.hands_not_busted} hands."
       end
-      puts "\n\nPlay again?"
-      continue = gets.chomp
-      unless ['n', 'no'].include? continue
-        self.reset_game
-      end
+      self.play_again?
 
     end
 
@@ -445,5 +438,20 @@ module BlackjackDoubles
       end
     end
 
+    def play_again?
+      puts "\n\nPlay again?"
+      continue = gets.chomp
+      if ['n', 'no'].include? continue
+        exit
+      elsif ['y', 'yes'].include? continue
+        self.reset_game
+        self.play_again
+      end
+    end
+
+    def play_again
+      @deck = self.make_deck
+      self.play
+    end
   end
 end

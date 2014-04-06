@@ -17,7 +17,7 @@ module BlackjackDoubles
       # winner here is the player object
       hands_not_busted = 0
       winner.hands.collection.each do |hand|
-        unless hand.points < 21
+        if hand.points < 21
           hands_not_busted += 1
         end
       end
@@ -30,6 +30,8 @@ module BlackjackDoubles
 
     def multiplier(number_of_hands)
       case number_of_hands
+      when 0
+        1
       when 1
         1
       when 2
