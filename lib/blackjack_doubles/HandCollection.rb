@@ -27,5 +27,10 @@ module BlackjackDoubles
     def flush
       @collection = HandCollection.new
     end
+
+    def
+      @collection.size
+    end
+
   end
 end
