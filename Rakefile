@@ -4,5 +4,5 @@ task :default => :play
 
 task :play do
   load './lib/blackjack_doubles.rb'
-  BlackjackDoubles::GameMechanics.new.play
+  BlackjackDoubles::Game.new.play
 end
