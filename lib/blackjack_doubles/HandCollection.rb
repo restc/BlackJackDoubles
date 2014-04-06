@@ -28,7 +28,7 @@ module BlackjackDoubles
       @collection = HandCollection.new
     end
 
-    def
+    def size
       @collection.size
     end
 
