@@ -8,27 +8,17 @@ module BlackjackDoubles
 
     MINIMUM_BET = 20
 
-    def initialize(names=nil, first_run=true)
+    def initialize(first_run=true)
       case first_run
       when true
         system 'clear'
+        Graphics.game_banner
+        top_margin
         unless self.read_instructions? == false
           self.read_instructions
         end
         players = Array.new
-        if names.nil?
-          names = get_names
-        elsif (!names.nil? && names.is_a?(Array) && names.length == 2)
-          names = names
-        elsif (!names.nil? && names.is_a?(Array) && names.length != 2)
-          # Wrong number of players exception #unfinished
-          puts "Wrong number of players"
-          names = get_names
-        elsif (!names.nil? && !names.is_a?(Array))
-          names = get_names(names)
-        else
-          puts "Something failing in name initialization"
-        end
+        names = self.get_names
         names.each do |name|
           players << Player.new(name)
         end
@@ -48,15 +38,22 @@ module BlackjackDoubles
       Deck.new
     end
 
-    def get_names(names=nil) # Returns an array of both names
-         # Don't ask for names unless names is nil
-      unless names != nil
-        puts "\nWhat are your names, contestants?"
-        names ||= gets.chomp
-      end
+    def get_names
+      system 'clear'
+      top_margin
+      puts "What are your names, players?"
+      names = gets.chomp
 
       if names.is_a?(String) && names.include?(' ')
         names = names.split(' ')
+      elsif names.is_a?(String) && names.include?(',')
+        names = names.split(',')
+      elsif names.is_a?(String) && names.include?('and')
+        names = names.split('and')
+      elsif names.is_a?(String) && names.include?('&')
+        names = names.split('&')
+      elsif names.is_a?(String) && names.include?('&&')
+        names = names.split('&&')
       elsif names.is_a?(String) && names.include?(',')
         names = names.split(',')
       else
@@ -117,7 +114,10 @@ module BlackjackDoubles
     end
 
     def hit?(player, hand)
-      hand.pretty_print
+      #Instead of hand.pretty_print... try self.scoreboard(player)
+      #hand.pretty_print
+      system 'clear'
+      self.scoreboard(player)
       unless hand.stand? == true
         case
         when (hand.points > 21 && hand.has_ace?)
@@ -130,8 +130,7 @@ module BlackjackDoubles
           hand.declare_bust(true)
         when hand.points < 21
 
-          puts "\nYou have #{hand.points} points in this hand. \nYou can [h]it or [s]tand."
-          #unfinished
+          puts "\nYou have #{hand.points} points in this hand. \n\nYou can [h]it or [s]tand."
 
           input = gets.chomp
           if 'h'.include? input
@@ -140,7 +139,6 @@ module BlackjackDoubles
             self.hit?(player, hand)
           elsif 's'.include? input
             hand.stand?(stand=true)
-            #unfinished method, #goto next player
           else
             puts "Type [h] to hit, or [s] to stand."
             self.hit?(player, hand)
@@ -173,22 +171,22 @@ module BlackjackDoubles
       system 'clear'
       puts <<-PARAGRAPH
 
-      BlackJackDoubles is a spinoff of the popular card game Blackjack.
-      It requires two players to play, and a neutral dealer.
+      BlackJackDoubles is a spinoff of the popular card game Blackjack. It requires
+      two players and a neutral dealer to play.
 
-      When starting the game, both players set an initial bet.
-      They are then dealt two cards each, face up, so that both
-      may see the other player's hand. A hand is any collection of cards.
-      Like Blackjack, you win if you score 21 points, or if you have a
-      higher score than the other player's corresponding hand while staying
-      under 21.
+      When starting the game, both players set an initial bet. They are then dealt two
+      cards each, face up, so that both may see the other player's hand. A hand is a
+      collection of cards that does not have duplicate numbers. When you're dealt a
+      duplicate, your hand splits, and your initial bet will double. Like Blackjack,
+      you win if you score 21 points, or if you have a higher score than the other
+      player's corresponding hand while staying under 21.
 
-      If you are dealt a duplicate card to your hand, your hand will
-      automatically split. When you split a hand, your bet also doubles.
-      At the end of the game, whether you stop betting or you run out of cards,
-      your hands will be compared to your opponent's hands, the best against the
-      best, and the winner will receive the prize money, with a bonus if you've
-      played more than one hand that didn't bust.
+      If you are dealt a duplicate card to your hand, your hand will automatically
+      split. When you split a hand, your bet also doubles. At the end of the game,
+      whether you stop betting or you run out of cards, your hands will be compared to
+      your opponent's hands, the best against the best, and the winner will receive
+      the prize money, with a bonus if you've played more than one hand that didn't
+      bust.
 
       You'll both start out with 1000g, and the minimum bet to play is 20g.
       Good luck!
@@ -206,13 +204,15 @@ module BlackjackDoubles
     end
 
     def bet
-      #1) Initial bet
       @players.each do |player|
         unless player.bet != nil
+          system 'clear'
           puts <<-PARAGRAPH
+          #{top_margin}
           #{player.name},
           The minimum bet is 20g. You have #{player.purse.balance}g.
-          \n\tWhat will you wager?
+
+          What will you wager?
 
           PARAGRAPH
           wager = gets.chomp.to_i
@@ -225,10 +225,6 @@ module BlackjackDoubles
           player.purse.subtract_bet(wager)
           @bank.deposit(wager)
 
-            # puts "Sorry, I didn't understand that. Please only type numbers."
-            # system 'clear'
-            # self.bet
-            #
         else
           puts "#{player.name}, you have already bet #{player.bet}."
         end
@@ -240,19 +236,10 @@ module BlackjackDoubles
       if player == nil
         @players.each do |player|
           graphics.print_grid(player)
-          puts "\n#{player.name} has the following scores for each hand: "
-          player.hands.collection.each_with_index do |hand, index|
-            puts "Hand #{index + 1} has a score of #{hand.points} points."
-          end
         end
       else
         graphics.print_grid(player)
-        puts "\n#{player.name} has the following scores for each hand: "
-        player.hands.collection.each_with_index do |hand, index|
-          puts "Hand #{index + 1} has a score of #{hand.points} points."
-        end
       end
-
     end
 
     def double_bet(player)
@@ -285,18 +272,20 @@ module BlackjackDoubles
       system 'clear'
       self.scoreboard
 
+      # Continue
       puts "\n\nPress [Enter] key to continue... "
       continue = gets.chomp
     end
 
     def gameplay_logic
-      # Implement game, certainly could be broken down better. Hackety hack etc.
+      # Gameplay rules, certainly could be broken down better. Hackety hack etc.
 
       @players.each do |player|
         system 'clear'
         puts "\nIt is now #{player.name}'s turn."
         puts "Press [Enter] to continue... "
         continue = gets.chomp
+
       # Allow each player to double the bet before choosing to hit or stand
         system 'clear'
         puts "\n\n\n"
@@ -321,7 +310,8 @@ module BlackjackDoubles
         end
       end # End players loop
       self.declare_winner
-      nil
+      sleep(5)
+      self.play_again
     end
 
     def gameplay_hit_or_stand(player)
@@ -377,6 +367,10 @@ module BlackjackDoubles
       score
     end
 
+    def top_margin
+      puts "\n\n"
+    end
+
     def find_winner(player)
       result = Array.new
       player.hands.collection.each_with_index do |hand, index|
@@ -421,6 +415,7 @@ module BlackjackDoubles
         puts "Player 1 wins! #{@players.first.name} wins #{winnings}g with #{@players.first.hands.hands_not_busted} hands."
       when 0
         puts "Deadlocked Tie. No one wins."
+        @secret_bank = @bank.balance
         @bank.balance = 0
         # winnings = @bank.balance
         # partial = winnings / 2
@@ -432,7 +427,12 @@ module BlackjackDoubles
         winnings = @bank.payout(@players.last)
         puts "Player 2 wins! #{@players.last.name} wins #{winnings}g with #{@players.last.hands.hands_not_busted} hands."
       end
-      self.play_again?
+
+      # <<<<<<<<<<<<<<
+      # Try auto-play_again
+      # self.play_again
+      # instead of
+      # self.play_again?
 
     end
 
@@ -446,18 +446,36 @@ module BlackjackDoubles
     def play_again?
       puts "\n\nPlay again?"
       continue = gets.chomp
-      if ['n', 'no'].include? continue
+      if ['n', 'no', 'N', 'No', 'NO'].include? continue
         self.winning_score
         exit
-      elsif ['y', 'yes'].include? continue
+      elsif ['y', 'yes', 'Y', 'Yes', ''].include? continue
         self.reset_game
         self.play_again
       end
     end
 
     def play_again
+      system 'clear'
+      self.reset_game
+      top_margin
+      puts <<-PARAGRAPH
+      New Round:
+
+
+        + Shuffling deck
+        + Resetting bets
+        + Dealing cards
+
+
+      Press [Enter] to continue.
+      PARAGRAPH
+      continue = gets.chomp
       @deck = self.make_deck
       self.play
     end
   end
+
+  private
+  attr_accessor :secret_bank
 end

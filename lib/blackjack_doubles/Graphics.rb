@@ -9,7 +9,7 @@ module BlackjackDoubles
       end
       player.hands.collection.each_with_index do |hand, index|
         puts %Q{\n\t _______________________________\n\t|\t\t\t\t|}
-        puts %Q{\t|\tPLAYER #{player.name}\t\t|\n\t|\tHAND #{index+1}\t\t\t|\n\t|\t\t\t\t|}
+        puts %Q{\t|\tPLAYER #{player.name}\t\t|\n\t|\tHAND #{index+1}  –  #{hand.points} points\t|\n\t|\t\t\t\t|}
         unless hand.cards.nil?
           hand.cards.each do |card|
 
@@ -27,7 +27,7 @@ module BlackjackDoubles
             end
           end
 
-          puts %Q{\t|\t\t\t\t|\n\t|\t(#{hand.points} points)\t\t|\n\t _______________________________\n}
+          puts %Q{\t|\t\t\t\t|\n\t|\t\t\t\t|\n\t _______________________________\n}
         end
         if hand.cards.nil?
           puts "\t|\tNo cards\t\t|"
@@ -35,5 +35,25 @@ module BlackjackDoubles
       end
     end
 
+    def self.game_banner
+      puts <<-BANNER
+
+
+      \t  ####  #     ###    ###  #  ##  #####  ###    ###  #  ##
+      \t  #  ## #    #   #  #     # ##     #   #   #  #     # ##
+      \t  ####  #    #####  #     ##       #   #####  #     ##
+      \t  #  ## #    #   #  #     # ##     #   #   #  #     # ##
+      \t  ####  #### #   #   ###  #  ##  ##    #   #   ###  #  ##
+
+      \t\t####    ###   #   #  ###   #    ####  ###
+      \t\t#   #  #   #  #   #  #  #  #    #     #
+      \t\t#   #  #   #  #   #  ###   #    ###   ###
+      \t\t#   #  #   #  #   #  #  #  #    #       #
+      \t\t####    ###    ###   ###   #### ####  ###
+      BANNER
+    end
+
   end
 end
+
+# (#{hand.points} points)
